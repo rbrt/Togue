@@ -15,7 +15,8 @@ public class CarController : MonoBehaviour {
 		  turningSpeed = 140,
 		  inertiaMaxDelta = .75f,
 		  acceleration = .5f,
-		  deceleration = .35f;
+		  deceleration = .35f,
+		  chaseCamFollowDelta = 75f;
 
 	Vector3 inertiaVector = Vector3.zero,
 			finalForce = Vector3.zero;
@@ -24,6 +25,7 @@ public class CarController : MonoBehaviour {
 		HandleInput();
 		HandleForwardSpeed();
 		HandleCornering();
+		HandleChaseCamera();
 
 		inertiaVector = Vector3.RotateTowards(inertiaVector.normalized,
 											  -carObject.transform.forward.normalized,
@@ -33,6 +35,12 @@ public class CarController : MonoBehaviour {
 		finalForce = (-carObject.transform.forward * forwardSpeed * .1f) + inertiaVector * forwardSpeed;
 
 		transform.position += finalForce;
+	}
+
+	void HandleChaseCamera(){
+		cameraControl.transform.localRotation = Quaternion.RotateTowards(cameraControl.transform.localRotation,
+																		 carObject.transform.localRotation,
+																		 chaseCamFollowDelta * Time.deltaTime);
 	}
 
 	void HandleForwardSpeed(){
