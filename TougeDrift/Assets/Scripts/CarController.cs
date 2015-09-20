@@ -26,21 +26,34 @@ public class CarController : MonoBehaviour {
 		HandleForwardSpeed();
 		HandleCornering();
 		HandleChaseCamera();
+		HandleInertia();
 
-		inertiaVector = Vector3.RotateTowards(inertiaVector.normalized,
-											  -carObject.transform.forward.normalized,
-											  inertiaMaxDelta * Time.deltaTime,
-											  0);
-
-		finalForce = (-carObject.transform.forward * forwardSpeed * .1f) + inertiaVector * forwardSpeed;
+		finalForce = (-carObject.transform.forward * forwardSpeed * .75f) + inertiaVector * forwardSpeed;
 
 		transform.position += finalForce;
 	}
 
 	void HandleChaseCamera(){
+		float difference = Quaternion.Angle(cameraControl.transform.localRotation,
+											carObject.transform.localRotation);
+
+		float modifier = Mathf.Min(1, difference / 45f);
+
 		cameraControl.transform.localRotation = Quaternion.RotateTowards(cameraControl.transform.localRotation,
 																		 carObject.transform.localRotation,
-																		 chaseCamFollowDelta * Time.deltaTime);
+																		 (chaseCamFollowDelta * modifier) * Time.deltaTime);
+
+		cameraControl.transform.localPosition = Vector3.zero;
+	}
+
+	void HandleInertia(){
+		float difference = Vector3.Angle(inertiaVector, carObject.transform.forward);
+		float modifier = Mathf.Min(1, difference / 50f);
+
+		inertiaVector = Vector3.RotateTowards(inertiaVector,
+											  -carObject.transform.forward,
+											  inertiaMaxDelta * modifier * Time.deltaTime,
+											  0);
 	}
 
 	void HandleForwardSpeed(){
@@ -55,12 +68,23 @@ public class CarController : MonoBehaviour {
 	}
 
 	void HandleCornering(){
+		float cameraRotationCarRotationDifference = Quaternion.Angle(cameraControl.transform.localRotation,
+																	 carObject.transform.localRotation);
+
+  		float modifier = 1;
+		float maxDifference = 50;
+		if (cameraRotationCarRotationDifference > maxDifference){
+			modifier = 1 - ((cameraRotationCarRotationDifference - maxDifference) / 3f);
+			Debug.Log("Noooope");
+			return;
+		}
+
 		if (turningLeft){
-			carObject.transform.Rotate(0, -turningSpeed * Time.deltaTime, 0);
+			carObject.transform.Rotate(0, -turningSpeed * modifier * Time.deltaTime, 0);
 		}
 
 		if (turningRight){
-			carObject.transform.Rotate(0, turningSpeed * Time.deltaTime, 0);
+			carObject.transform.Rotate(0, turningSpeed * modifier * Time.deltaTime, 0);
 		}
 	}
 
