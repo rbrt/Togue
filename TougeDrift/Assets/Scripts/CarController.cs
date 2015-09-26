@@ -19,11 +19,15 @@ public class CarController : MonoBehaviour {
 		  turnBoost = 600,
 		  inertiaMaxDelta = 1f,
 		  acceleration = .5f,
-		  deceleration = .35f,
+		  deceleration = .05f,
+		  timeSpentOnGas = 0,
+		  maxGasTime = .5f,
 		  chaseCamFollowDelta = 75f;
 
 	Vector3 inertiaVector = Vector3.zero,
 			finalForce = Vector3.zero;
+
+	VisualizeForces visualizeForces;
 
 	void Update () {
 		HandleInput();
@@ -36,6 +40,8 @@ public class CarController : MonoBehaviour {
 
 		transform.position += finalForce;
 		cameraControl.transform.localPosition = carObject.transform.localPosition;
+
+		visualizeForces.SetForces(-carObject.transform.forward * forwardSpeed, inertiaVector);
 	}
 
 	void HandleChaseCamera(){
@@ -55,9 +61,11 @@ public class CarController : MonoBehaviour {
 		float difference = Vector3.Angle(inertiaVector, carObject.transform.forward);
 		float modifier = Mathf.Min(1, difference / 30f);
 
+		float accelerationModifier = timeSpentOnGas / maxGasTime;
+
 		inertiaVector = Vector3.RotateTowards(inertiaVector,
 											  -carObject.transform.forward,
-											  inertiaMaxDelta * modifier * Time.deltaTime,
+											  inertiaMaxDelta * modifier * accelerationModifier * Time.deltaTime,
 											  0);
 	}
 
@@ -76,15 +84,6 @@ public class CarController : MonoBehaviour {
 		Debug.DrawRay(carObject.transform.position, inertiaVector * 10, Color.yellow);
 		Debug.DrawRay(carObject.transform.position, -carObject.transform.forward * forwardSpeed *10, Color.red);
 
-		float forwardVectorInvertiaVectorDifference = Vector3.Angle(inertiaVector,
-																	carObject.transform.forward);
-
-  		float modifier = 1;
-		float maxDifference = 50;
-		if (forwardVectorInvertiaVectorDifference > maxDifference){
-			modifier = 1 - ((forwardVectorInvertiaVectorDifference - maxDifference) / 3f);
-		}
-
 		bool boostTurn = false;
 		if (turningLeft){
 			if (currentTurnSpeed > 0){
@@ -96,7 +95,6 @@ public class CarController : MonoBehaviour {
 		}
 		else if (turningRight){
 			if (currentTurnSpeed < 0){
-				Debug.Log("Boost right");
 				boostTurn = true;
 			}
 			currentTurnSpeed = Mathf.Min(currentTurnSpeed + (turnAcceleration + (boostTurn ? turnBoost : 0)) *
@@ -111,8 +109,6 @@ public class CarController : MonoBehaviour {
 				currentTurnSpeed = Mathf.Max(currentTurnSpeed - turndeceleration * Time.deltaTime, 0);
 			}
 		}
-
-		//Debug.Log(currentTurnSpeed);
 
 		carObject.transform.Rotate(0, currentTurnSpeed * Time.deltaTime, 0);
 	}
@@ -141,10 +137,16 @@ public class CarController : MonoBehaviour {
 
 		if (Input.GetKeyUp(KeyCode.W)){
 			accelerating = false;
+			timeSpentOnGas = 0;
+		}
+
+		if (accelerating){
+			timeSpentOnGas = Mathf.Min(timeSpentOnGas  + Time.deltaTime, maxGasTime);
 		}
 	}
 
 	void Awake(){
+		visualizeForces = GetComponent<VisualizeForces>();
 		inertiaVector = -carObject.transform.forward;
 	}
 

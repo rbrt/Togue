@@ -45,9 +45,16 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\SafeCoroutines\Coroutine\SafeCoroutine.cs" />
+     <Compile Include="Assets\SafeCoroutines\Coroutine\SafeCoroutineExtension.cs" />
+     <Compile Include="Assets\SafeCoroutines\Coroutine\SafeCoroutineState.cs" />
+     <Compile Include="Assets\Scripts\AdjustVehicleStance.cs" />
      <Compile Include="Assets\Scripts\CarController.cs" />
+     <Compile Include="Assets\Scripts\Physics Based Controller\PhysicsCarController.cs" />
      <Compile Include="Assets\Scripts\TrackBounds.cs" />
-     <None Include="Assets\Track.shader" />
+     <Compile Include="Assets\Scripts\VisualizeForces.cs" />
+     <None Include="Assets\Shaders\Wireframe.shader" />
+     <None Include="Assets\Shaders\Track.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

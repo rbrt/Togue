@@ -3,7 +3,7 @@ using System.Collections;
 
 public class TrackBounds : MonoBehaviour {
 
-	[SerializeField] protected CarController carController;
+	[SerializeField] protected PhysicsCarController carController;
 
 	void OnCollisionEnter(Collision info){
 		if (info.collider == carController.GetCarCollider()){
