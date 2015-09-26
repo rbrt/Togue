@@ -7,7 +7,7 @@ public class TrackBounds : MonoBehaviour {
 
 	void OnCollisionEnter(Collision info){
 		if (info.collider == carController.GetCarCollider()){
-			carController.HitTrackBounds();
+			carController.HitTrackBounds(info.contacts[0].point);
 		}
 	}
 }

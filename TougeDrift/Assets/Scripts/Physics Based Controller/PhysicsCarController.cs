@@ -85,6 +85,15 @@ public class PhysicsCarController : MonoBehaviour {
 			steeringAmount = 0;
 		}
 
+		float angleBetweenInertiaAndForwardVector = Vector3.Angle(-carTransform.forward,
+																  carRigidbody.velocity);
+		if (steeringAmount == 0){
+			carRigidbody.velocity = Vector3.RotateTowards(carRigidbody.velocity, 
+														  -carTransform.forward, 
+														  Mathf.Deg2Rad * 10 * Time.deltaTime,
+														  0);
+		}
+
 		if (carRigidbody.velocity.magnitude < topSpeed){
 			carRigidbody.AddForce(forceVector * acceleration);
 		}
@@ -106,8 +115,8 @@ public class PhysicsCarController : MonoBehaviour {
 		return carObject.GetComponent<BoxCollider>();
 	}
 
-	public void HitTrackBounds(){
-		acceleration *= .1f;
-		//carRigidbody.velocity = Vector3.zero;
+	public void HitTrackBounds(Vector3 collisionPoint){
+		Vector3 collisionForce = (collisionPoint - carTransform.position) * -50;
+		carRigidbody.AddForce(collisionForce);
 	}
 }
