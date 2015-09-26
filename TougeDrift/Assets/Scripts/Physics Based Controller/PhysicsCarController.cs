@@ -6,9 +6,9 @@ using System.Linq;
 public class PhysicsCarController : MonoBehaviour {
 
 	[SerializeField] protected Rigidbody carRigidbody;	
-	[SerializeField] protected GameObject carObject,
-										  cameraControl,
-										  cameraObject;
+	[SerializeField] protected GameObject carObject;
+
+	[SerializeField] protected CameraControl cameraControl;
 
 	bool accelerating = false,
 		 turningRight = false,
@@ -33,6 +33,7 @@ public class PhysicsCarController : MonoBehaviour {
 
 	void Update () {
 		HandleInput();
+		cameraControl.SetForceVectors(carRigidbody.velocity, -carTransform.forward, carTransform.right);
 	}
 
 	void FixedUpdate(){
@@ -85,8 +86,6 @@ public class PhysicsCarController : MonoBehaviour {
 			steeringAmount = 0;
 		}
 
-		float angleBetweenInertiaAndForwardVector = Vector3.Angle(-carTransform.forward,
-																  carRigidbody.velocity);
 		if (steeringAmount == 0){
 			carRigidbody.velocity = Vector3.RotateTowards(carRigidbody.velocity, 
 														  -carTransform.forward, 
@@ -103,12 +102,6 @@ public class PhysicsCarController : MonoBehaviour {
 		}
 
 		Debug.DrawRay(carObject.transform.position, carRigidbody.velocity, Color.red);
-	}
-
-	void HandleCamera(){
-		cameraObject.transform.LookAt(carObject.transform.position);
-		cameraObject.GetComponent<Rigidbody>().AddForce((cameraControl.transform.position - 
-														 cameraObject.transform.position));
 	}
 
 	public Collider GetCarCollider(){
