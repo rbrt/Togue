@@ -5,11 +5,13 @@ public class CameraControl : MonoBehaviour {
 
 	[SerializeField] protected GameObject cameraObject,
 										  carObject,
-										  cameraViewTarget;
+										  cameraViewTarget,
+										  followObject;
 
 	float rotateSpeed = 40f,
 		  angleScale = .75f,
-		  displacementSpeed = 2.5f;
+		  displacementSpeed = 2.5f,
+		  followSpeed = 50;
 
 	Vector3 forwardVector = Vector3.zero,
 			inertiaVector = Vector3.zero,
@@ -21,35 +23,15 @@ public class CameraControl : MonoBehaviour {
 		cameraBeginningLocalPosition = cameraObject.transform.localPosition;
 	}
 
-	void Update () {
+	void FixedUpdate () {
+		float speedModifier = Vector3.Distance(cameraObject.transform.position, 
+											   carObject.transform.position);
+
 		cameraObject.transform.LookAt(cameraViewTarget.transform.position);
-
-		if (Vector3.Distance(inertiaVector, Vector3.zero) > .01f){
-			float angle = Vector3.Angle(inertiaVector, forwardVector) * angleScale;
-
-			if (Vector3.Angle(inertiaVector, rightVector) <= 90){
-				angle *= -1;
-			}
-
-			if (Quaternion.Angle(transform.localRotation, Quaternion.Euler(Vector3.up * angle)) > 10){
-				Quaternion targetRotation = Quaternion.RotateTowards(transform.localRotation,
-																 	 Quaternion.Euler(Vector3.up * angle),
-															   	 	 rotateSpeed * Time.deltaTime); 
-				transform.localRotation = targetRotation;
-			}
-			//SetCameraDisplacement(angle);
-		}
-		else{
-			//SetCameraDisplacement(0);
-			Quaternion targetRotation = Quaternion.RotateTowards(transform.localRotation,
-																 	 Quaternion.Euler(Vector3.zero),
-															   	 	 rotateSpeed * Time.deltaTime); 
-				transform.localRotation = targetRotation;
-		}
-
-//		cameraObject.transform.localPosition = Vector3.MoveTowards(cameraObject.transform.localPosition,
-//																   cameraBeginningLocalPosition + cameraDisplacement,
-//																   displacementSpeed * Time.deltaTime);
+		cameraObject.transform.position = Vector3.MoveTowards(cameraObject.transform.position,
+															  followObject.transform.position, 
+															  followSpeed * (speedModifier / 30) * Time.deltaTime);
+		
 	}
 
 	void SetCameraDisplacement(float angle){
