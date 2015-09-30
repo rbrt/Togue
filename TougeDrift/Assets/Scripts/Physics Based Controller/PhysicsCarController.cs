@@ -16,18 +16,22 @@ public class PhysicsCarController : MonoBehaviour {
 
 	Transform carTransform;
 	Vector3 forceVector;
+	Vector3 inertiaForce;
+
+	SafeCoroutine inertiaForceCoroutine;
 
 	float acceleration = 0,
 		  steeringAmount = 0,
 		  maxAcceleration = 20,
 		  maxSteering = 50,
 		  accelerationIncrease = 10f,
-		  accelerationDecrease = .25f,
+		  accelerationDecrease = .15f,
 		  topSpeed = 30,
 		  topRotation = 3;
 
 	void Awake(){
 		carTransform = carObject.GetComponent<Transform>();
+		inertiaForce = Vector3.zero;
 		carRigidbody.maxAngularVelocity = 2;
 	}
 
@@ -62,6 +66,12 @@ public class PhysicsCarController : MonoBehaviour {
 		}
 
 		if (Input.GetKeyUp(KeyCode.W)){
+			if (turningRight || turningLeft){
+				if (inertiaForceCoroutine == null || !inertiaForceCoroutine.IsRunning){
+					inertiaForce = carRigidbody.velocity;
+					inertiaForceCoroutine = this.StartSafeCoroutine(InertiaFalloff());
+				}
+			}
 			accelerating = false;
 		}
 	}
@@ -93,6 +103,8 @@ public class PhysicsCarController : MonoBehaviour {
 														  0);
 		}
 
+		forceVector += inertiaForce;
+
 		if (carRigidbody.velocity.magnitude < topSpeed){
 			carRigidbody.AddForce(forceVector * acceleration);
 		}
@@ -111,5 +123,16 @@ public class PhysicsCarController : MonoBehaviour {
 	public void HitTrackBounds(Vector3 collisionPoint){
 		Vector3 collisionForce = (collisionPoint - carTransform.position) * -50;
 		carRigidbody.AddForce(collisionForce);
+	}
+
+	IEnumerator InertiaFalloff(){
+		float time = 1f;
+		Vector3 originalVector = inertiaForce;
+		for (float i = 0; i <= 1; i += Time.deltaTime / time){
+			inertiaForce = Vector3.Lerp(originalVector, Vector3.zero, i);
+			yield return null;
+		}
+
+		inertiaForce = Vector3.zero;
 	}
 }
