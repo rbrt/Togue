@@ -53,8 +53,6 @@ public class CarController : MonoBehaviour {
 		cameraControl.transform.localRotation = Quaternion.RotateTowards(cameraControl.transform.localRotation,
 																		 carObject.transform.localRotation,
 																		 (chaseCamFollowDelta * modifier) * Time.deltaTime);
-
-		cameraControl.transform.localPosition = Vector3.zero;
 	}
 
 	void HandleInertia(){
